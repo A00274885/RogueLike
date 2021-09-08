@@ -2,10 +2,12 @@
 #include <iostream>
 #include <string>
 
-const int LEVELWIDTH = 30;
-const int LEVELHEIGHT = 15;
+#include "Generation.h"
 
-unsigned int playerPositionX = 5;
+const int LEVELWIDTH = 50;
+const int LEVELHEIGHT = 25;
+
+unsigned int playerPositionX = 1;
 unsigned int playerPositionY = 5;
 unsigned int newPlayerPositionX = playerPositionX;
 unsigned int newPlayerPositionY = playerPositionY;
@@ -19,21 +21,31 @@ char wallChar = 'a';
 
 char map[LEVELHEIGHT][LEVELWIDTH + 1] =
 {
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              ",
-"                              "
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  ",
+"                                                  "
 };
 
 void gotoScreenPosition(short C, short R)
@@ -43,6 +55,14 @@ void gotoScreenPosition(short C, short R)
 	xy.Y = R;
 	SetConsoleCursorPosition(
 		GetStdHandle(STD_OUTPUT_HANDLE), xy);
+}
+
+bool checkColl(int x, int y)
+{
+	if (map[y][x] == 'w')
+		return false;
+	else
+		return true;
 }
 
 void renderMap()
@@ -55,37 +75,45 @@ void renderMap()
 	{
 		for (int n = 0; n < LEVELWIDTH + 1; n++)
 		{
+			if (i == 0 || i == LEVELHEIGHT -1)
+				map[i][n] = 'w';
+
+			if (n == 0 || n == LEVELWIDTH)
+				map[i][n] = 'w';
 			std::cout << map[i][n];
 		}
 		std::cout << std::endl;
 	}
 }
 
+
 void handleInput()
 {
 	newPlayerPositionX = playerPositionX;
 	newPlayerPositionY = playerPositionY;
 
-	if (GetKeyState(VK_UP) & 0x8000 && (map[playerPositionY - 1][playerPositionX] != 'a'))
+	if (GetKeyState(VK_UP) & 0x8000 && checkColl(playerPositionX, playerPositionY-1))
 	{
 		newPlayerPositionY = playerPositionY - 1;
 	}
 
-	if (GetKeyState(VK_DOWN) & 0x8000 && (map[playerPositionY+1][playerPositionX] != 'a'))
+	if (GetKeyState(VK_DOWN) & 0x8000 && checkColl(playerPositionX, playerPositionY+1))
 	{
 		newPlayerPositionY = playerPositionY + 1;
 	}
 
-	if (GetKeyState(VK_RIGHT) & 0x8000 && (map[playerPositionY][playerPositionX +1] != 'a'))
+	if (GetKeyState(VK_RIGHT) & 0x8000 && checkColl(playerPositionX+1, playerPositionY))
 	{
 		newPlayerPositionX = playerPositionX + 1;
 	}
 
-	if (GetKeyState(VK_LEFT) & 0x8000 && (map[playerPositionY][playerPositionX-1] != 'a'))
+	if (GetKeyState(VK_LEFT) & 0x8000 && checkColl(playerPositionX-1,playerPositionY))
 	{
 		newPlayerPositionX = playerPositionX - 1;
 	}
 }
+
+
 
 void renderPlayer()
 {
