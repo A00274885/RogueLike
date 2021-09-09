@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <iostream>
 #include <string>
+#include <string>
 
 #include "Generation.h"
 
@@ -13,7 +14,8 @@ unsigned int newPlayerPositionX = playerPositionX;
 unsigned int newPlayerPositionY = playerPositionY;
 
 char playerChar = 'P';
-char monsterChar = 77;
+const char monsterChar = 77;
+std::string currentString;
 
 char borderChar = 219;
 
@@ -30,7 +32,6 @@ int playerAttack = 4;
 int playerHealth = 20;
 
 int monsterHealth = 20;
-
 
 char map[LEVELHEIGHT][LEVELWIDTH + 1] =
 {
@@ -61,13 +62,32 @@ char map[LEVELHEIGHT][LEVELWIDTH + 1] =
 "                                                  "
 };
 
-void gotoScreenPosition(short C, short R)
+void main()
 {
-	COORD xy;
-	xy.X = C;
-	xy.Y = R;
-	SetConsoleCursorPosition(
-		GetStdHandle(STD_OUTPUT_HANDLE), xy);
+	HWND console = GetConsoleWindow();
+	RECT r;
+	GetWindowRect(console, &r);
+
+	MoveWindow(console, r.left, r.top, 800, 800, TRUE);
+
+	generateRooms(5, 2, 7, 5);
+	generateRooms(20, 5, 15, 8);
+	generateRooms(10, 15, 25, 5);
+	generatePaths();
+	renderMap();
+
+	while (true)
+	{
+		// Handles the input and updates the players position
+		handleInput();
+
+		// Render the scene
+		renderPlayer();
+
+		// Render the GUI
+		renderGUI();
+	}
+	system("pause");
 }
 
 bool checkColl(int x, int y)
@@ -90,59 +110,26 @@ bool checkColl(int x, int y)
 		return true;
 	case pathChar:
 		return true;
+	case monsterChar:
+		encounterMonster(x,y);
+		return false;
 	default:
 		return false;
 	}
 }
 
-void renderMap()
+
+
+/// <summary>
+/// Creation of the game world and everything in it
+/// Classes: Generate rooms
+///			 Generate paths
+///			 Generate Map
+/// </summary>
+
+void generateRooms(int x, int y, int width, int height)
 {
-	
-	for (int i = 0; i < LEVELHEIGHT; i++)
-	{
-		for (int n = 0; n < LEVELWIDTH + 1; n++)
-		{
-			if (i == 0 || i == LEVELHEIGHT -1)
-				map[i][n] = borderChar;
 
-			if (n == 0 || n == LEVELWIDTH)
-				map[i][n] = borderChar;
-			std::cout << map[i][n];
-		}
-		std::cout << std::endl;
-	}
-}
-
-
-void handleInput()
-{
-	newPlayerPositionX = playerPositionX;
-	newPlayerPositionY = playerPositionY;
-
-	if (GetKeyState(VK_UP) & 0x8000 && checkColl(playerPositionX, playerPositionY-1))
-	{
-		newPlayerPositionY = playerPositionY - 1;
-	}
-
-	if (GetKeyState(VK_DOWN) & 0x8000 && checkColl(playerPositionX, playerPositionY+1))
-	{
-		newPlayerPositionY = playerPositionY + 1;
-	}
-
-	if (GetKeyState(VK_RIGHT) & 0x8000 && checkColl(playerPositionX+1, playerPositionY))
-	{
-		newPlayerPositionX = playerPositionX + 1;
-	}
-
-	if (GetKeyState(VK_LEFT) & 0x8000 && checkColl(playerPositionX-1,playerPositionY))
-	{
-		newPlayerPositionX = playerPositionX - 1;
-	}
-}
-
-void generateRooms(int x,int y,int width,int height)
-{
-	
 	int pWidth = x + width;
 	int pHeight = y + height;
 
@@ -208,6 +195,59 @@ void generatePaths()
 
 }
 
+
+void renderMap()
+{
+
+	for (int i = 0; i < LEVELHEIGHT; i++)
+	{
+		for (int n = 0; n < LEVELWIDTH + 1; n++)
+		{
+			if (i == 0 || i == LEVELHEIGHT - 1)
+				map[i][n] = borderChar;
+
+			if (n == 0 || n == LEVELWIDTH)
+				map[i][n] = borderChar;
+			std::cout << map[i][n];
+		}
+		std::cout << std::endl;
+	}
+}
+
+
+/// <summary>
+/// Input handling
+/// </summary>
+void handleInput()
+{
+	newPlayerPositionX = playerPositionX;
+	newPlayerPositionY = playerPositionY;
+
+
+
+	if (GetKeyState(VK_UP) & 0x8000 && checkColl(playerPositionX, playerPositionY-1))
+	{
+		newPlayerPositionY = playerPositionY - 1;
+	}
+	else if (GetKeyState(VK_DOWN) & 0x8000 && checkColl(playerPositionX, playerPositionY+1))
+	{
+		newPlayerPositionY = playerPositionY + 1;
+	}
+	else if (GetKeyState(VK_RIGHT) & 0x8000 && checkColl(playerPositionX+1, playerPositionY))
+	{
+		newPlayerPositionX = playerPositionX + 1;
+	}
+	else if (GetKeyState(VK_LEFT) & 0x8000 && checkColl(playerPositionX-1,playerPositionY))
+	{
+		newPlayerPositionX = playerPositionX - 1;
+	}
+}
+
+
+/// <summary>
+/// All code related to Player and non player characters on the screen and how
+/// they interact with eachother and the environment
+/// </summary>
 void renderPlayer()
 {
 	// Blank old player position
@@ -228,40 +268,44 @@ void renderPlayer()
 	Sleep(60);
 }
 
+void encounterMonster(int x, int y)
+{
+	monsterHealth = monsterHealth - playerAttack;
+	currentString = "Player hit the monster";
+	if (monsterHealth <= 0)
+	{
+		map[y][x] = walkChar;
+		currentString = "Player killed the monster";
+	}
+}
+
+
+
+
+/// <summary>
+/// All code related to rendering the gui and other game information
+/// to the player
+/// Classes: RenderGUI
+/// </summary>
 void renderGUI()
 {
 	gotoScreenPosition(2, LEVELHEIGHT + 3);
 	std::cout << "Health: " << playerHealth << std:: endl <<"Attack: " << playerAttack;
+
+	gotoScreenPosition(LEVELWIDTH + 5, LEVELHEIGHT / 2);
+	std::cout << currentString;
 }
 
-void main()
+
+/// <summary>
+/// Different tools used frequently throughout the program
+/// Classes: gotoScreenPosition
+/// </summary>
+void gotoScreenPosition(short C, short R)
 {
-	HWND console = GetConsoleWindow();
-	RECT r;
-	GetWindowRect(console, &r);
-
-	MoveWindow(console, r.left, r.top, 800, 800, TRUE);
-
-	
-	generateRooms( 5,2, 7, 5);
-	generateRooms(20, 5, 15, 8);
-	generateRooms(10, 15, 25,5 );
-	generatePaths();
-	renderMap();
-	
-
-	while (true)
-	{
-		// Handles the input and updates the players position
-		handleInput();
-
-		// Render the scene
-		renderPlayer();
-
-		// Render the GUI
-		renderGUI();
-
-	}
-
-	system("pause");
+	COORD xy;
+	xy.X = C;
+	xy.Y = R;
+	SetConsoleCursorPosition(
+		GetStdHandle(STD_OUTPUT_HANDLE), xy);
 }
