@@ -24,6 +24,8 @@ const char trWallChar = 187;
 const char brWallChar = 188;
 const char tlWallChar = 201;
 const char blWallChar = 200;
+const char walkChar = 249;
+const char pathChar = 176;
 
 
 char map[LEVELHEIGHT][LEVELWIDTH + 1] =
@@ -70,24 +72,22 @@ bool checkColl(int x, int y)
 	{
 	case vWallChar:
 		return false;
-		break;
 	case hWallChar:
 		return false;
-		break;
 	case trWallChar:
 		return false;
-		break;
 	case tlWallChar:
 		return false;
-		break;
 	case brWallChar:
 		return false;
-		break;
 	case blWallChar:
 		return false;
-	default:
+	case walkChar:
 		return true;
-		break;
+	case pathChar:
+		return true;
+	default:
+		return false;
 	}
 }
 
@@ -177,18 +177,38 @@ void generateRooms(int x,int y,int width,int height)
 			{
 				map[lY][lX] = hWallChar;
 			}
+			else
+			{
+				map[lY][lX] = walkChar;
+			}
 
 		}
 	}
 }
 
+void generatePaths()
+{
+	map[5][12] = pathChar;
+	map[5][13] = pathChar;
+	map[5][14] = pathChar;
+	map[5][15] = pathChar;
+	map[5][16] = pathChar;
+	map[6][16] = pathChar;
+	map[7][16] = pathChar;
+	map[8][16] = pathChar;
+	map[8][17] = pathChar;
+	map[8][18] = pathChar;
+	map[8][19] = pathChar;
+	map[8][20] = pathChar;
+}
+
 void renderPlayer()
 {
-	// Blank old enemy position
+	// Blank old player position
 	gotoScreenPosition(playerPositionX, playerPositionY);
-	std::cout << ' ';
+	std::cout << walkChar;
 
-	// Draw new enemy position
+	// Draw new player position
 	gotoScreenPosition(newPlayerPositionX, newPlayerPositionY);
 	std::cout << playerChar;
 	gotoScreenPosition(newPlayerPositionX, newPlayerPositionY);
@@ -216,6 +236,7 @@ void main()
 	
 	generateRooms( 5,2, 7, 5);
 	generateRooms(20, 5, 15, 8);
+	generatePaths();
 	renderMap();
 	
 
