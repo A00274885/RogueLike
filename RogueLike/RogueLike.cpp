@@ -7,7 +7,7 @@
 const int LEVELWIDTH = 50;
 const int LEVELHEIGHT = 25;
 
-unsigned int playerPositionX = 1;
+unsigned int playerPositionX = 7;
 unsigned int playerPositionY = 5;
 unsigned int newPlayerPositionX = playerPositionX;
 unsigned int newPlayerPositionY = playerPositionY;
@@ -16,7 +16,14 @@ unsigned int health = 0;
 
 char playerChar = 'P';
 
-char wallChar = 'a';
+char borderChar = 219;
+
+const char vWallChar = 186;
+const char hWallChar = 205;
+const char trWallChar = 187;
+const char brWallChar = 188;
+const char tlWallChar = 201;
+const char blWallChar = 200;
 
 
 char map[LEVELHEIGHT][LEVELWIDTH + 1] =
@@ -59,10 +66,29 @@ void gotoScreenPosition(short C, short R)
 
 bool checkColl(int x, int y)
 {
-	if (map[y][x] == 'w')
+	switch (map[y][x])
+	{
+	case vWallChar:
 		return false;
-	else
+		break;
+	case hWallChar:
+		return false;
+		break;
+	case trWallChar:
+		return false;
+		break;
+	case tlWallChar:
+		return false;
+		break;
+	case brWallChar:
+		return false;
+		break;
+	case blWallChar:
+		return false;
+	default:
 		return true;
+		break;
+	}
 }
 
 void renderMap()
@@ -76,10 +102,10 @@ void renderMap()
 		for (int n = 0; n < LEVELWIDTH + 1; n++)
 		{
 			if (i == 0 || i == LEVELHEIGHT -1)
-				map[i][n] = 'w';
+				map[i][n] = borderChar;
 
 			if (n == 0 || n == LEVELWIDTH)
-				map[i][n] = 'w';
+				map[i][n] = borderChar;
 			std::cout << map[i][n];
 		}
 		std::cout << std::endl;
@@ -113,7 +139,48 @@ void handleInput()
 	}
 }
 
+void generateRooms(int x,int y,int width,int height)
+{
+	
+	int pWidth = x + width;
+	int pHeight = y + height;
 
+	for (int lY = y; lY < pHeight+1; lY++)
+	{
+		for (int lX = x; lX < pWidth+1; lX++)
+		{
+			if (lX == x && lY == y)
+			{
+				map[lY][lX] = tlWallChar;
+			}
+			else if (lY == y && lX != pWidth)
+			{
+				map[lY][lX] = hWallChar;
+			}
+			else if (lY == y)
+			{
+				map[lY][lX] = trWallChar;
+			}
+			else if (lY != pHeight && (lX == x || lX == pWidth))
+			{
+				map[lY][lX] = vWallChar;
+			}
+			else if (lY == pHeight && lX == x)
+			{
+				map[lY][lX] = blWallChar;
+			}
+			else if (lY == pHeight && lX == pWidth)
+			{
+				map[lY][lX] = brWallChar;
+			}
+			else if (lY == pHeight)
+			{
+				map[lY][lX] = hWallChar;
+			}
+
+		}
+	}
+}
 
 void renderPlayer()
 {
@@ -138,15 +205,6 @@ void renderGUI()
 	std::cout << "Health: " << health;
 }
 
-void generateMap()
-{
-	//Pick a spot on the map and define width and height
-	//Draw the rooms in without overlapping
-	//Create doors and connecting tunnels between rooms (pathfinding?)
-
-	
-}
-
 void main()
 {
 	HWND console = GetConsoleWindow();
@@ -155,7 +213,9 @@ void main()
 
 	MoveWindow(console, r.left, r.top, 800, 800, TRUE);
 
-	generateMap();
+	
+	generateRooms( 5,2, 7, 5);
+	generateRooms(20, 5, 15, 8);
 	renderMap();
 	
 
