@@ -12,9 +12,8 @@ unsigned int playerPositionY = 5;
 unsigned int newPlayerPositionX = playerPositionX;
 unsigned int newPlayerPositionY = playerPositionY;
 
-unsigned int health = 0;
-
 char playerChar = 'P';
+char monsterChar = 77;
 
 char borderChar = 219;
 
@@ -26,6 +25,11 @@ const char tlWallChar = 201;
 const char blWallChar = 200;
 const char walkChar = 249;
 const char pathChar = 176;
+
+int playerAttack = 4;
+int playerHealth = 20;
+
+int monsterHealth = 20;
 
 
 char map[LEVELHEIGHT][LEVELWIDTH + 1] =
@@ -93,10 +97,7 @@ bool checkColl(int x, int y)
 
 void renderMap()
 {
-	//for (int i = 0; i < LEVELHEIGHT; i++)
-	//{
-	//	std::cout << map[i] << std::endl;
-	//}
+	
 	for (int i = 0; i < LEVELHEIGHT; i++)
 	{
 		for (int n = 0; n < LEVELWIDTH + 1; n++)
@@ -145,9 +146,9 @@ void generateRooms(int x,int y,int width,int height)
 	int pWidth = x + width;
 	int pHeight = y + height;
 
-	for (int lY = y; lY < pHeight+1; lY++)
+	for (int lY = y; lY < pHeight + 1; lY++)
 	{
-		for (int lX = x; lX < pWidth+1; lX++)
+		for (int lX = x; lX < pWidth + 1; lX++)
 		{
 			if (lX == x && lY == y)
 			{
@@ -184,6 +185,7 @@ void generateRooms(int x,int y,int width,int height)
 
 		}
 	}
+	map[18][20] = monsterChar;
 }
 
 void generatePaths()
@@ -200,13 +202,20 @@ void generatePaths()
 	map[8][18] = pathChar;
 	map[8][19] = pathChar;
 	map[8][20] = pathChar;
+	map[15][23] = pathChar;
+	map[14][23] = pathChar;
+	map[13][23] = pathChar;
+
 }
 
 void renderPlayer()
 {
 	// Blank old player position
 	gotoScreenPosition(playerPositionX, playerPositionY);
-	std::cout << walkChar;
+	if (map[playerPositionY][playerPositionX] == pathChar)
+		std::cout << pathChar;
+	else
+		std::cout << walkChar;
 
 	// Draw new player position
 	gotoScreenPosition(newPlayerPositionX, newPlayerPositionY);
@@ -222,7 +231,7 @@ void renderPlayer()
 void renderGUI()
 {
 	gotoScreenPosition(2, LEVELHEIGHT + 3);
-	std::cout << "Health: " << health;
+	std::cout << "Health: " << playerHealth << std:: endl <<"Attack: " << playerAttack;
 }
 
 void main()
@@ -236,6 +245,7 @@ void main()
 	
 	generateRooms( 5,2, 7, 5);
 	generateRooms(20, 5, 15, 8);
+	generateRooms(10, 15, 25,5 );
 	generatePaths();
 	renderMap();
 	
